@@ -41,12 +41,12 @@ class GDExample : public Node {
 private:
 
 protected:
-	static void _bind_methods();
+	static void _bind_methods() {};
 
 public:
 
-	GDExample();
-	~GDExample();
+	GDExample() {};
+	~GDExample() {};
 
 	void _ready() override;
 };
