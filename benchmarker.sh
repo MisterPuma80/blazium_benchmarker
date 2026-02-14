@@ -346,9 +346,11 @@ for param in "$@"; do
 			;;
 		download)
 			download
+			sleep 1
 			;;
 		patch:+([0-9]))
 			patch "$param"
+			sleep 1
 			;;
 		linker:+(*))
 			linker "$param"
@@ -361,21 +363,26 @@ for param in "$@"; do
 			;;
 		reset)
 			reset
+			sleep 1
 			;;
 		engine)
 			engine
+			sleep 5
 			;;
 		benchmarks)
 			benchmarks
+			sleep 5
 			;;
 		run)
 			run
+			sleep 1
 			;;
 		show)
 			show
 			;;
 		clean)
 			clean
+			sleep 1
 			;;
 		*)
 			help
