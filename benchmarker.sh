@@ -43,10 +43,8 @@ This is a script to benchmark Blazium.
 COMMENT
 
 
-
-
-COMPILER="use_llvm=yes"
-LINKER="linker=mold"
+COMPILER=""
+LINKER=""
 COMPILER_AND_LINKER="$COMPILER $LINKER"
 
 
@@ -266,6 +264,41 @@ patch() {
 	set +x
 }
 
+linker() {
+	set -x
+
+	IFS=":" read -r prefix linker_name <<< "$1"
+
+	LINKER="linker=$linker_name"
+	COMPILER_AND_LINKER="$COMPILER $LINKER"
+	#echo $COMPILER_AND_LINKER
+
+	set +x
+}
+
+use_llvm() {
+	set -x
+
+	IFS=":" read -r prefix use_llvm <<< "$1"
+
+	COMPILER="use_llvm=$use_llvm"
+	COMPILER_AND_LINKER="$COMPILER $LINKER"
+	#echo $COMPILER_AND_LINKER
+
+	set +x
+}
+
+cores() {
+	set -x
+
+	IFS=":" read -r prefix cores <<< "$1"
+
+	BUILD_CORES=$cores
+	#echo $BUILD_CORES
+
+	set +x
+}
+
 reset() {
 	set -x
 
@@ -316,6 +349,15 @@ for param in "$@"; do
 			;;
 		patch:+([0-9]))
 			patch "$param"
+			;;
+		linker:+(*))
+			linker "$param"
+			;;
+		use_llvm:+(*))
+			use_llvm "$param"
+			;;
+		cores:+([0-9]))
+			cores "$param"
 			;;
 		reset)
 			reset
