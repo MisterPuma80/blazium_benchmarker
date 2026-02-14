@@ -5,7 +5,7 @@
 # Checkout repo
 git clone https://github.com/MisterPuma80/blazium_benchmarker
 cd blazium_benchmarker
-checkout master
+git checkout master
 
 # Download engines
 ./benchmarker.sh download
