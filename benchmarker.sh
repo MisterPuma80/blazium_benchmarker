@@ -169,6 +169,7 @@ benchmarks() {
 	scons platform=linux target=template_debug dev_build=yes $COMPILER -j $BUILD_CORES
 	rm -f -rf demo/export
 	mkdir -p demo/export
+	sleep 3
 	./blazium/bin/blazium.linuxbsd.editor.x86_64 --headless --export-release "Benchmarks Headless Linux" ./demo/project.godot
 	echo "!!!! Done building release blazium"
 	cd ..
@@ -179,6 +180,7 @@ benchmarks() {
 	scons platform=linux target=template_debug dev_build=yes $COMPILER -j $BUILD_CORES
 	rm -f -rf demo/export
 	mkdir -p demo/export
+	sleep 3
 	./blazium/bin/blazium.linuxbsd.editor.x86_64 --headless --export-release "Benchmarks Headless Linux" ./demo/project.godot
 	echo "!!!! Done building release blazium"
 	cd ..
