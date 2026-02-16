@@ -4,6 +4,9 @@ import sys
 
 env = SConscript("blazium-cpp/SConstruct")
 
+iterations = ARGUMENTS['iterations']
+env.Append(CPPDEFINES=[('ITERATIONS', iterations)])
+
 # For reference:
 # - CCFLAGS are compilation flags shared between C and C++
 # - CFLAGS are for C-specific compilation flags

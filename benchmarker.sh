@@ -42,7 +42,7 @@ This is a script to benchmark Blazium.
 
 COMMENT
 
-
+ITERATIONS=100000000
 COMPILER=""
 LINKER=""
 COMPILER_AND_LINKER="$COMPILER $LINKER"
@@ -165,8 +165,8 @@ benchmarks() {
 
 	echo "Building Blazium 4.5 ..."
 	cd example_blazium_4.5
-	scons platform=linux target=template_release dev_build=no $COMPILER -j $BUILD_CORES
-	scons platform=linux target=template_debug dev_build=yes $COMPILER -j $BUILD_CORES
+	scons platform=linux target=template_release dev_build=no $COMPILER -j $BUILD_CORES iterations=$ITERATIONS
+	scons platform=linux target=template_debug dev_build=yes $COMPILER -j $BUILD_CORES iterations=$ITERATIONS
 	rm -f -rf demo/export
 	mkdir -p demo/export
 	sleep 3
@@ -176,8 +176,8 @@ benchmarks() {
 
 	echo "Building Blazium 4.5 Modified ..."
 	cd example_blazium_4.5_modified
-	scons platform=linux target=template_release dev_build=no $COMPILER -j $BUILD_CORES
-	scons platform=linux target=template_debug dev_build=yes $COMPILER -j $BUILD_CORES
+	scons platform=linux target=template_release dev_build=no $COMPILER -j $BUILD_CORES iterations=$ITERATIONS
+	scons platform=linux target=template_debug dev_build=yes $COMPILER -j $BUILD_CORES iterations=$ITERATIONS
 	rm -f -rf demo/export
 	mkdir -p demo/export
 	sleep 3
@@ -220,7 +220,7 @@ run() {
 show() {
 	set -x
 
-	python3 make_chart.py
+	python3 make_chart.py --iterations $ITERATIONS
 
 	set +x
 }

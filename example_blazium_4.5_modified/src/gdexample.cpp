@@ -34,8 +34,6 @@
 using namespace godot;
 
 
-const int ITERATIONS = 1000000;
-
 #include <chrono>
 #include <cstdint>
 #include <iostream>

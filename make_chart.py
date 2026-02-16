@@ -31,7 +31,15 @@
 
 import json
 import subprocess
+import argparse
 import sys
+
+# Get iterations count
+parser = argparse.ArgumentParser(description="Make benchmark chart")
+parser.add_argument("--iterations", help="The number of iterations in the tests.")
+args = parser.parse_args()
+iterations = int(args.iterations)
+iterations = f"{iterations:,}"
 
 PURPLE = "\033[48;5;55m\033[38;5;255m"
 GREEN = "\033[48;5;28m\033[38;5;255m"
@@ -164,7 +172,7 @@ if __name__ == "__main__":
 
 	# Add footer
 	colored += "| " + ("-" * (line_len - 4)) + " |\n"
-	colored += "| " + "Average time in nanoseconds. 1,000,000 iterations each test.".ljust(line_len - 4) + " |\n"
+	colored += "| " + "Average time in nanoseconds. {0} iterations each test.".format(iterations).ljust(line_len - 4) + " |\n"
 	colored += "| " + ("-" * (line_len - 4)) + " |\n"
 
 	print(colored)
