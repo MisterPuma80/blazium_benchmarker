@@ -229,21 +229,39 @@ clean() {
 	set -x
 
 	cd example_blazium_4.5_modified
+	rm -f .sconsign.dblite
+	rm -f src/gdexample.os
+	rm -f src/register_types.os
+	rm -f demo/bin/*.so
+	rm -rf -f demo/export
+
 	cd blazium
 	git clean -fxd
-	cd ..
-	cd blazium-cpp
-	git clean -fxd
-	cd ..
 	cd ..
 
-	cd example_blazium_4.5
-	cd blazium
-	git clean -fxd
-	cd ..
 	cd blazium-cpp
 	git clean -fxd
 	cd ..
+
+	cd ..
+
+
+
+	cd example_blazium_4.5
+	rm -f .sconsign.dblite
+	rm -f src/gdexample.os
+	rm -f src/register_types.os
+	rm -f demo/bin/*.so
+	rm -rf -f demo/export
+
+	cd blazium
+	git clean -fxd
+	cd ..
+
+	cd blazium-cpp
+	git clean -fxd
+	cd ..
+
 	cd ..
 
 	set +x
