@@ -68,10 +68,37 @@ Dictionary _test_node_get_children() {
 	return entry;
 }
 
+
+Dictionary _test_node_get_children_again() {
+	uint64_t ticks = 0, total = 0, average = 0;
+	auto start = get_ticks_now();
+	auto end = get_ticks_now();
+	const int total_child_nodes = 100;
+	Node *root_tree = _make_node_tree_flat(total_child_nodes, 42);
+	for (int i = 0; i < ITERATIONS; i++) {
+		start = get_ticks_now();
+		TypedArray<Node> all = root_tree->get_children();
+		end = get_ticks_now();
+		ticks = get_ticks_diff(end, start);
+		total += ticks;
+		ASSERT_EQUAL(all.size(), total_child_nodes);
+	}
+	_delete_node_tree(root_tree);
+	average = total / ITERATIONS;
+
+	Dictionary values;
+	values[String("total")] = total;
+	values[String("average")] = average;
+	Dictionary entry;
+	entry[String("Node::get_children again")] = values;
+	return entry;
+}
+
 void GDExample::_ready() {
 	Dictionary result;
 
 	result.merge(_test_node_get_children());
+	result.merge(_test_node_get_children_again());
 
 	benchmark_footer(this, result);
 }
