@@ -68,10 +68,61 @@ Dictionary _test_node_get_children() {
 	return entry;
 }
 
+Dictionary _test_string_to_lower() {
+	uint64_t ticks = 0, total = 0, average = 0;
+	auto start = get_ticks_now();
+	auto end = get_ticks_now();
+	String a = "No Place Like Home";
+	String b = "no place like home";
+	for (int i = 0; i < ITERATIONS; i++) {
+		start = get_ticks_now();
+		String ret = a.to_lower();
+		end = get_ticks_now();
+		ticks = get_ticks_diff(end, start);
+		total += ticks;
+		ASSERT_EQUAL(ret, b);
+	}
+	average = total / ITERATIONS;
+
+	Dictionary values;
+	values[String("total")] = total;
+	values[String("average")] = average;
+	Dictionary entry;
+	entry[String("String::to_lower")] = values;
+	return entry;
+}
+
+Dictionary _test_string_to_upper() {
+	uint64_t ticks = 0, total = 0, average = 0;
+	auto start = get_ticks_now();
+	auto end = get_ticks_now();
+	String a = "No Place Like Home";
+	String b = "NO PLACE LIKE HOME";
+	for (int i = 0; i < ITERATIONS; i++) {
+		start = get_ticks_now();
+		String ret = a.to_upper();
+		end = get_ticks_now();
+		ticks = get_ticks_diff(end, start);
+		total += ticks;
+		ASSERT_EQUAL(ret, b);
+	}
+	average = total / ITERATIONS;
+
+	Dictionary values;
+	values[String("total")] = total;
+	values[String("average")] = average;
+	Dictionary entry;
+	entry[String("String::to_upper")] = values;
+	return entry;
+}
+
 void GDExample::_ready() {
 	Dictionary result;
 
 	result.merge(_test_node_get_children());
+
+	result.merge(_test_string_to_lower());
+	result.merge(_test_string_to_upper());
 
 	benchmark_footer(this, result);
 }
