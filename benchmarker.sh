@@ -170,7 +170,7 @@ benchmarks() {
 	rm -f -rf demo/export
 	mkdir -p demo/export
 	sleep 3
-	./blazium/bin/blazium.linuxbsd.editor.x86_64 --headless --export-release "Benchmarks Headless Linux" ./demo/project.godot
+	./blazium/bin/blazium.linuxbsd.editor.x86_64 --export-release "Benchmarks Headless Linux" ./demo/project.godot
 	echo "!!!! Done building release blazium"
 	cd ..
 
@@ -181,7 +181,7 @@ benchmarks() {
 	rm -f -rf demo/export
 	mkdir -p demo/export
 	sleep 3
-	./blazium/bin/blazium.linuxbsd.editor.x86_64 --headless --export-release "Benchmarks Headless Linux" ./demo/project.godot
+	./blazium/bin/blazium.linuxbsd.editor.x86_64 --export-release "Benchmarks Headless Linux" ./demo/project.godot
 	echo "!!!! Done building release blazium"
 	cd ..
 
