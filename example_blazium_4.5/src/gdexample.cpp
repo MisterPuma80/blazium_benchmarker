@@ -225,15 +225,15 @@ Dictionary _test_string_nocasecmp_to() {
 	uint64_t ticks = 0, total = 0, average = 0;
 	auto start = get_ticks_now();
 	auto end = get_ticks_now();
-	String a = "no place like like home";
-	String b = "no place like like the circus";
+	String a = "no place like like BBB";
+	String b = "no place like like bbb";
 	for (int i = 0; i < ITERATIONS; i++) {
 		start = get_ticks_now();
 		int ret = a.nocasecmp_to(b);
 		end = get_ticks_now();
 		ticks = get_ticks_diff(end, start);
 		total += ticks;
-		ASSERT_EQUAL(ret, -1);
+		ASSERT_EQUAL(ret, 0);
 	}
 	average = total / ITERATIONS;
 
@@ -249,15 +249,15 @@ Dictionary _test_string_naturalnocasecmp_to() {
 	uint64_t ticks = 0, total = 0, average = 0;
 	auto start = get_ticks_now();
 	auto end = get_ticks_now();
-	String a = "no place like like home";
-	String b = "no place like like the circus";
+	String a = "no place like like BBB";
+	String b = "no place like like bbb";
 	for (int i = 0; i < ITERATIONS; i++) {
 		start = get_ticks_now();
 		int ret = a.naturalnocasecmp_to(b);
 		end = get_ticks_now();
 		ticks = get_ticks_diff(end, start);
 		total += ticks;
-		ASSERT_EQUAL(ret, -1);
+		ASSERT_EQUAL(ret, 0);
 	}
 	average = total / ITERATIONS;
 
