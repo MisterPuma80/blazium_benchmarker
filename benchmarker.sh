@@ -228,15 +228,6 @@ run() {
 		( while true; do sudo -nv; sleep 60; done ) &>/dev/null &
 		SUDO_LOOP_PID=$!
 		trap 'kill $SUDO_LOOP_PID' EXIT
-	elif [[ "$OS" == "windows" ]]; then
-		PLATFORM="windows"
-		PLATFORM_TEMPLATES="windows"
-		EXT="x86_64.exe"
-		EXPORT_NAME="Windows Desktop"
-		PYTHON="python"
-	else
-		echo "Unknown PLATFORM"
-		exit 1
 	fi
 
 	# Turn off cpu freq scaling, address space randomization, and hyper threading
