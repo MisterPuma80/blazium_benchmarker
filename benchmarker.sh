@@ -42,9 +42,9 @@ This is a script to benchmark Blazium.
 
 COMMENT
 
-ITERATIONS=100000000
-COMPILER=""
-LINKER=""
+ITERATIONS=10000000
+COMPILER="use_llvm=no"
+LINKER="linker=default"
 COMPILER_AND_LINKER="$COMPILER $LINKER"
 
 
@@ -79,6 +79,29 @@ else
 	exit 1
 fi
 
+# Get the parameters for this OS
+PLATFORM="Unknown"
+PLATFORM_TEMPLATES="Unknown"
+EXT="Unknown"
+EXPORT_NAME="Unknown"
+PYTHON="Unknown"
+if [[ "$OS" == "linux" ]]; then
+	PLATFORM="linuxbsd"
+	PLATFORM_TEMPLATES="linux"
+	EXT="x86_64"
+	EXPORT_NAME="Linux"
+	PYTHON="python3"
+elif [[ "$OS" == "windows" ]]; then
+	PLATFORM="windows"
+	PLATFORM_TEMPLATES="windows"
+	EXT="x86_64.exe"
+	EXPORT_NAME="Windows Desktop"
+	PYTHON="python"
+else
+	echo "Unknown PLATFORM"
+	exit 1
+fi
+
 # Get cpu core count-1 clamped between 1 and 1000
 BUILD_CORES=`nproc`
 if [[ ! "$BUILD_CORES" =~ ^[0-9]+$ ]]; then
@@ -99,17 +122,25 @@ remove_llvm_ext() {
 
 download_blazium_4_5() {
 	# Download Blazium
-	git clone https://github.com/blazium-engine/blazium
-	cd blazium
-	git checkout blazium-4.5
-	git submodule update --init --remote --recursive
-	cd ..
+	if [ ! -d "blazium" ]; then
+		git clone https://github.com/blazium-engine/blazium
+		cd blazium
+		git checkout blazium-4.5
+		git submodule update --init --remote --recursive
+		cd ..
+	else
+		echo "blazium directory already exists. Skiping download."
+	fi
 
 	# Download Blazium CPP API Bindings
-	git clone https://github.com/blazium-engine/blazium-cpp
-	cd blazium-cpp
-	git checkout blazium-dev
-	cd ..
+	if [ ! -d "blazium-cpp" ]; then
+		git clone https://github.com/blazium-engine/blazium-cpp
+		cd blazium-cpp
+		git checkout blazium-dev
+		cd ..
+	else
+		echo "blazium-cpp directory already exists. Skiping download."
+	fi
 }
 
 build_blazium() {
@@ -118,17 +149,17 @@ build_blazium() {
 	rm -f bin/*.x86_64
 	rm -f bin/*.llvm
 	rm -f bin/*.exe
-	scons platform=linuxbsd target=editor dev_build=no dev_mode=no $COMPILER_AND_LINKER tests=yes execinfo=yes scu_build=yes -j $BUILD_CORES
-	scons platform=linuxbsd target=template_release dev_build=no dev_mode=no $COMPILER_AND_LINKER scu_build=yes -j $BUILD_CORES
-	remove_llvm_ext bin/blazium.linuxbsd.editor.x86_64.llvm
-	remove_llvm_ext bin/blazium.linuxbsd.template_release.x86_64.llvm
+	scons platform=$PLATFORM target=editor dev_build=no dev_mode=no $COMPILER_AND_LINKER tests=no execinfo=yes scu_build=yes -j $BUILD_CORES
+	scons platform=$PLATFORM target=template_release dev_build=no dev_mode=no $COMPILER_AND_LINKER scu_build=yes -j $BUILD_CORES
+	remove_llvm_ext bin/blazium.$PLATFORM.editor.x86_64.llvm
+	remove_llvm_ext bin/blazium.$PLATFORM.template_release.x86_64.llvm
 	cd ..
 
 	# Dump fresh API json file and header from Blazium Editor
 	cd blazium-cpp/gdextension
 	rm -f extension_api.json
 	rm -f gdextension_interface.h
-	../../blazium/bin/blazium.linuxbsd.editor.x86_64 --headless --dump-extension-api --dump-gdextension-interface
+	../../blazium/bin/blazium.$PLATFORM.editor.$EXT --headless --dump-extension-api --dump-gdextension-interface
 	cd ../..
 }
 
@@ -165,23 +196,23 @@ benchmarks() {
 
 	echo "Building Blazium 4.5 ..."
 	cd example_blazium_4.5
-	scons platform=linux target=template_release dev_build=no $COMPILER -j $BUILD_CORES iterations=$ITERATIONS
-	scons platform=linux target=template_debug dev_build=yes $COMPILER -j $BUILD_CORES iterations=$ITERATIONS
+	scons platform=$PLATFORM_TEMPLATES target=template_release dev_build=no $COMPILER -j $BUILD_CORES iterations=$ITERATIONS
+	scons platform=$PLATFORM_TEMPLATES target=template_debug dev_build=yes $COMPILER -j $BUILD_CORES iterations=$ITERATIONS
 	rm -f -rf demo/export
 	mkdir -p demo/export
 	sleep 3
-	./blazium/bin/blazium.linuxbsd.editor.x86_64 --export-release "Benchmarks Headless Linux" ./demo/project.godot
+	./blazium/bin/blazium.$PLATFORM.editor.$EXT --export-release "$EXPORT_NAME" ./demo/project.godot
 	echo "!!!! Done building release blazium"
 	cd ..
 
 	echo "Building Blazium 4.5 Modified ..."
 	cd example_blazium_4.5_modified
-	scons platform=linux target=template_release dev_build=no $COMPILER -j $BUILD_CORES iterations=$ITERATIONS
-	scons platform=linux target=template_debug dev_build=yes $COMPILER -j $BUILD_CORES iterations=$ITERATIONS
+	scons platform=$PLATFORM_TEMPLATES target=template_release dev_build=no $COMPILER -j $BUILD_CORES iterations=$ITERATIONS
+	scons platform=$PLATFORM_TEMPLATES target=template_debug dev_build=yes $COMPILER -j $BUILD_CORES iterations=$ITERATIONS
 	rm -f -rf demo/export
 	mkdir -p demo/export
 	sleep 3
-	./blazium/bin/blazium.linuxbsd.editor.x86_64 --export-release "Benchmarks Headless Linux" ./demo/project.godot
+	./blazium/bin/blazium.$PLATFORM.editor.$EXT --export-release "$EXPORT_NAME" ./demo/project.godot
 	echo "!!!! Done building release blazium"
 	cd ..
 
@@ -191,11 +222,22 @@ benchmarks() {
 run() {
 	set -x
 
-	# Constantly refresh sudo in a sub process that is killed at exit
-	sudo -v
-	( while true; do sudo -nv; sleep 60; done ) &>/dev/null &
-	SUDO_LOOP_PID=$!
-	trap 'kill $SUDO_LOOP_PID' EXIT
+	# If on Linux, constantly refresh sudo in a sub process that is killed at exit
+	if [[ "$OS" == "linux" ]]; then
+		sudo -v
+		( while true; do sudo -nv; sleep 60; done ) &>/dev/null &
+		SUDO_LOOP_PID=$!
+		trap 'kill $SUDO_LOOP_PID' EXIT
+	elif [[ "$OS" == "windows" ]]; then
+		PLATFORM="windows"
+		PLATFORM_TEMPLATES="windows"
+		EXT="x86_64.exe"
+		EXPORT_NAME="Windows Desktop"
+		PYTHON="python"
+	else
+		echo "Unknown PLATFORM"
+		exit 1
+	fi
 
 	# Turn off cpu freq scaling, address space randomization, and hyper threading
 	#sudo cpupower frequency-set --governor performance
@@ -206,8 +248,13 @@ run() {
 	#sleep 10
 
 	cwd="$PWD"
-	sudo nice -n -20 sudo -u $USER taskset -c 5 ./example_blazium_4.5/demo/export/demo.x86_64 --no-header --headless --single-threaded-scene --fixed-fps 60 --delta-smoothing disable --disable-vsync --disable-render-loop -- name "benchmark_blazium_4_5.json" cwd $cwd
-	sudo nice -n -20 sudo -u $USER taskset -c 5 ./example_blazium_4.5_modified/demo/export/demo.x86_64 --no-header --headless --single-threaded-scene --fixed-fps 60 --delta-smoothing disable --disable-vsync --disable-render-loop -- name "benchmark_blazium_4_5_modified.json" cwd $cwd
+	if [[ "$OS" == "linux" ]]; then
+		sudo nice -n -20 sudo -u $USER taskset -c 5 ./example_blazium_4.5/demo/export/demo.x86_64 --no-header --headless --single-threaded-scene --fixed-fps 60 --delta-smoothing disable --disable-vsync --disable-render-loop -- name "benchmark_blazium_4_5.json" cwd $cwd
+		sudo nice -n -20 sudo -u $USER taskset -c 5 ./example_blazium_4.5_modified/demo/export/demo.x86_64 --no-header --headless --single-threaded-scene --fixed-fps 60 --delta-smoothing disable --disable-vsync --disable-render-loop -- name "benchmark_blazium_4_5_modified.json" cwd $cwd
+	else
+		./example_blazium_4.5/demo/export/demo.x86_64 --no-header --headless --single-threaded-scene --fixed-fps 60 --delta-smoothing disable --disable-vsync --disable-render-loop -- name "benchmark_blazium_4_5.json" cwd $cwd
+		./example_blazium_4.5_modified/demo/export/demo.x86_64 --no-header --headless --single-threaded-scene --fixed-fps 60 --delta-smoothing disable --disable-vsync --disable-render-loop -- name "benchmark_blazium_4_5_modified.json" cwd $cwd
+	fi
 
 	# Turn things back on
 	#echo on | sudo tee /sys/devices/system/cpu/smt/control
@@ -220,7 +267,7 @@ run() {
 show() {
 	set -x
 
-	python3 make_chart.py --iterations $ITERATIONS
+	$PYTHON make_chart.py --iterations $ITERATIONS
 
 	set +x
 }
@@ -235,13 +282,33 @@ clean() {
 	rm -f demo/bin/*.so
 	rm -rf -f demo/export
 
-	cd blazium
-	git clean -fxd
-	cd ..
+	if [ -d "blazium" ]; then
+		cd blazium
+		scons platform=$PLATFORM target=editor dev_build=no dev_mode=no $COMPILER_AND_LINKER tests=no execinfo=yes scu_build=yes -c
+		scons platform=$PLATFORM target=template_release dev_build=no dev_mode=no $COMPILER_AND_LINKER scu_build=yes -c
+		find . -name "*.gen.cpp" -delete
+		find . -type d -name "__pycache__" -exec rm -rf {} +
+		find . -type d -name "scu" -exec rm -rf {} +
+		rm -f -rf bin
+		rm -f -rf platform/linuxbsd/wayland/protocol
+		rm -f .scons_env.json
+		rm -rf .scons_node_count
+		rm -rf .sconsign5.dblite
+		rm -rf config.log
+		rm -f -rf .sconf_temp
+		cd ..
+	fi
 
-	cd blazium-cpp
-	git clean -fxd
-	cd ..
+	if [ -d "blazium-cpp" ]; then
+		cd blazium-cpp
+		scons platform=$PLATFORM_TEMPLATES target=editor -c
+		scons platform=$PLATFORM_TEMPLATES target=template_release -c
+		git restore gdextension/gdextension_interface.h
+		git restore gdextension/extension_api.json
+		find . -type d -name "__pycache__" -exec rm -rf {} +
+		rm -f .sconsign.dblite
+		cd ..
+	fi
 
 	cd ..
 
@@ -254,13 +321,33 @@ clean() {
 	rm -f demo/bin/*.so
 	rm -rf -f demo/export
 
-	cd blazium
-	git clean -fxd
-	cd ..
+	if [ -d "blazium" ]; then
+		cd blazium
+		scons platform=$PLATFORM target=editor dev_build=no dev_mode=no $COMPILER_AND_LINKER tests=no execinfo=yes scu_build=yes -c
+		scons platform=$PLATFORM target=template_release dev_build=no dev_mode=no $COMPILER_AND_LINKER scu_build=yes -c
+		find . -name "*.gen.cpp" -delete
+		find . -type d -name "__pycache__" -exec rm -rf {} +
+		find . -type d -name "scu" -exec rm -rf {} +
+		rm -f -rf bin
+		rm -f -rf platform/linuxbsd/wayland/protocol
+		rm -f .scons_env.json
+		rm -rf .scons_node_count
+		rm -rf .sconsign5.dblite
+		rm -rf config.log
+		rm -f -rf .sconf_temp
+		cd ..
+	fi
 
-	cd blazium-cpp
-	git clean -fxd
-	cd ..
+	if [ -d "blazium-cpp" ]; then
+		cd blazium-cpp
+		scons platform=$PLATFORM_TEMPLATES target=editor -c
+		scons platform=$PLATFORM_TEMPLATES target=template_release -c
+		git restore gdextension/gdextension_interface.h
+		git restore gdextension/extension_api.json
+		find . -type d -name "__pycache__" -exec rm -rf {} +
+		rm -f .sconsign.dblite
+		cd ..
+	fi
 
 	cd ..
 
@@ -348,7 +435,7 @@ help() {
 	echo "./benchmarker.sh download - Downloads engine, export templates, and cpp api bindings"
 	echo "./benchmarker.sh patch:github_pr_# - Downloads and applies a github PR patch"
 	echo "./benchmarker.sh linker:name - The linker to use. Default system default."
-	echo "./benchmarker.sh use_llvm:true or false - To use LLVM or not. Default false."
+	echo "./benchmarker.sh use_llvm:yes or no - To use LLVM or not. Defaults to no."
 	echo "./benchmarker.sh cores:number - The number of cpu cores to use for -j."
 	echo "./benchmarker.sh reset - Resets any changes to engine code, but ignores unknown files"
 	echo "./benchmarker.sh engine - Builds engine, export templates, and dumps api json file"
