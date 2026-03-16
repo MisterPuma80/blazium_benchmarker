@@ -120,6 +120,29 @@ remove_llvm_ext() {
 	fi
 }
 
+url_to_filename() {
+	$PYTHON -c "
+import urllib.parse, sys
+# URL encode the raw url
+raw_url = sys.argv[1]
+encoded = urllib.parse.quote(raw_url, safe='')
+
+# Trim dot and space
+clean = encoded.strip('. ')
+
+# Prefix _ if using a reserved Windows name
+reserved = {
+	'CON', 'PRN', 'AUX', 'NUL', 'COM1', 'COM2', 'COM3', 'COM4',
+	'COM5', 'COM6', 'COM7', 'COM8', 'COM9', 'LPT1', 'LPT2',
+	'LPT3', 'LPT4', 'LPT5', 'LPT6', 'LPT7', 'LPT8', 'LPT9',
+}
+if clean.upper() in reserved:
+	clean = '_' + clean
+
+print(clean)
+" "$1"
+}
+
 download_blazium_4_5() {
 	# Download Blazium
 	if [ ! -d "blazium" ]; then
@@ -346,15 +369,17 @@ clean() {
 patch() {
 	set -x
 
-	IFS="=" read -r prefix pr_number <<< "$1"
+	local prefix raw_url encoded_url
+	IFS="=" read -r prefix raw_url <<< "$1"
 
 	mkdir -p patches
-	curl -L -o patches/pr_$pr_number.patch https://github.com/blazium-games/blazium/pull/$pr_number.patch
+	encoded_url=$(url_to_filename "$raw_url")
+	curl -L -o patches/$encoded_url $raw_url
 
 	cd example_blazium_4.5_modified/blazium
 	git reset --hard HEAD
 	git clean -fd
-	git apply ../../patches/pr_$pr_number.patch
+	git apply ../../patches/$encoded_url
 	cd ../..
 
 	set +x
@@ -363,6 +388,7 @@ patch() {
 linker() {
 	set -x
 
+	local prefix linker_name
 	IFS="=" read -r prefix linker_name <<< "$1"
 
 	LINKER="linker=$linker_name"
@@ -375,6 +401,7 @@ linker() {
 use_llvm() {
 	set -x
 
+	local prefix use_llvm
 	IFS="=" read -r prefix use_llvm <<< "$1"
 
 	COMPILER="use_llvm=$use_llvm"
@@ -387,6 +414,7 @@ use_llvm() {
 cores() {
 	set -x
 
+	local prefix cores
 	IFS="=" read -r prefix cores <<< "$1"
 
 	BUILD_CORES=$cores
@@ -422,7 +450,7 @@ reset() {
 help() {
 	echo "./benchmarker.sh help - Prints help."
 	echo "./benchmarker.sh download - Downloads engines, export templates, and cpp api bindings"
-	echo "./benchmarker.sh patch=github_pr_# - Downloads and applies a github PR patch"
+	echo "./benchmarker.sh patch=URL.patch - Downloads and applies a git patch"
 	echo "./benchmarker.sh linker=name - The linker to use. Default system default."
 	echo "./benchmarker.sh use_llvm=yes or no - To use LLVM or not. Defaults to no."
 	echo "./benchmarker.sh cores=number - The number of cpu cores to use for -j."
@@ -446,7 +474,7 @@ for param in "$@"; do
 		download)
 			download
 			;;
-		patch=+([0-9]))
+		patch=+(*))
 			patch "$param"
 			;;
 		linker=+(*))
