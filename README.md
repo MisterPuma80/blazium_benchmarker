@@ -39,12 +39,9 @@ git checkout blazium_patch_602
 
 # Requirements
 
-. git
-
-. curl
-
-. python3
-
-. python csvlook
-
-. scons
+- git
+- python3
+- python csvlook
+- scons
+- curl
+- C++ compiler and linker
