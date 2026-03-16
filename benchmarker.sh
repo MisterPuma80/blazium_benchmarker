@@ -348,7 +348,7 @@ clean() {
 patch() {
 	set -x
 
-	IFS=":" read -r prefix pr_number <<< "$1"
+	IFS="=" read -r prefix pr_number <<< "$1"
 
 	mkdir -p patches
 	curl -L -o patches/pr_$pr_number.patch https://github.com/blazium-games/blazium/pull/$pr_number.patch
@@ -365,7 +365,7 @@ patch() {
 linker() {
 	set -x
 
-	IFS=":" read -r prefix linker_name <<< "$1"
+	IFS="=" read -r prefix linker_name <<< "$1"
 
 	LINKER="linker=$linker_name"
 	COMPILER_AND_LINKER="$COMPILER $LINKER"
@@ -377,7 +377,7 @@ linker() {
 use_llvm() {
 	set -x
 
-	IFS=":" read -r prefix use_llvm <<< "$1"
+	IFS="=" read -r prefix use_llvm <<< "$1"
 
 	COMPILER="use_llvm=$use_llvm"
 	COMPILER_AND_LINKER="$COMPILER $LINKER"
@@ -389,7 +389,7 @@ use_llvm() {
 cores() {
 	set -x
 
-	IFS=":" read -r prefix cores <<< "$1"
+	IFS="=" read -r prefix cores <<< "$1"
 
 	BUILD_CORES=$cores
 	#echo $BUILD_CORES
@@ -424,10 +424,10 @@ reset() {
 help() {
 	echo "./benchmarker.sh help - Prints help."
 	echo "./benchmarker.sh download - Downloads engines, export templates, and cpp api bindings"
-	echo "./benchmarker.sh patch:github_pr_# - Downloads and applies a github PR patch"
-	echo "./benchmarker.sh linker:name - The linker to use. Default system default."
-	echo "./benchmarker.sh use_llvm:yes or no - To use LLVM or not. Defaults to no."
-	echo "./benchmarker.sh cores:number - The number of cpu cores to use for -j."
+	echo "./benchmarker.sh patch=github_pr_# - Downloads and applies a github PR patch"
+	echo "./benchmarker.sh linker=name - The linker to use. Default system default."
+	echo "./benchmarker.sh use_llvm=yes or no - To use LLVM or not. Defaults to no."
+	echo "./benchmarker.sh cores=number - The number of cpu cores to use for -j."
 	echo "./benchmarker.sh reset - Resets any changes to engine code, but ignores unknown files"
 	echo "./benchmarker.sh engines - Builds engines, export templates, and dumps api json file"
 	echo "./benchmarker.sh benchmarks - Builds benchmarks as a game"
@@ -449,17 +449,17 @@ for param in "$@"; do
 			download
 			sleep 1
 			;;
-		patch:+([0-9]))
+		patch=+([0-9]))
 			patch "$param"
 			sleep 1
 			;;
-		linker:+(*))
+		linker=+(*))
 			linker "$param"
 			;;
-		use_llvm:+(*))
+		use_llvm=+(*))
 			use_llvm "$param"
 			;;
-		cores:+([0-9]))
+		cores=+([0-9]))
 			cores "$param"
 			;;
 		reset)
