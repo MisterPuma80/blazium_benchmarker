@@ -16,6 +16,9 @@ git checkout master
 # Build everything and run benchmarks
 ./benchmarker.sh engines benchmarks run show
 
+# Run again using different compiler and linker settings
+./benchmarker.sh cores=10 linker=mold use_llvm=yes engines benchmarks run show
+
 ```
 
 # Benchmark Blazium PRs
@@ -27,14 +30,12 @@ cd blazium_benchmarker
 # Download engines
 ./benchmarker.sh download
 
+# Install patch into modified blazium
+./benchmarker.sh reset patch=https://github.com/blazium-games/blazium/pull/597.patch
 
-# Run patch benchmark
-git checkout blazium_patch_597
-./benchmarker.sh reset patch=597 engines benchmarks run show
+# Run benchmark
+./benchmarker.sh engines benchmarks run show
 
-# Run different patch benchmark
-git checkout blazium_patch_602
-./benchmarker.sh reset patch=602 cores=10 linker=mold use_llvm=yes engines benchmarks run show
 ```
 
 # Requirements
