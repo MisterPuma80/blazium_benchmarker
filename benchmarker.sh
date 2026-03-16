@@ -200,7 +200,6 @@ benchmarks() {
 	scons platform=$PLATFORM_TEMPLATES target=template_debug dev_build=yes $COMPILER -j $BUILD_CORES iterations=$ITERATIONS
 	rm -f -rf demo/export
 	mkdir -p demo/export
-	sleep 3
 	./blazium/bin/blazium.$PLATFORM.editor.$EXT --export-release "$EXPORT_NAME" ./demo/project.godot
 	echo "!!!! Done building release blazium"
 	cd ..
@@ -211,7 +210,6 @@ benchmarks() {
 	scons platform=$PLATFORM_TEMPLATES target=template_debug dev_build=yes $COMPILER -j $BUILD_CORES iterations=$ITERATIONS
 	rm -f -rf demo/export
 	mkdir -p demo/export
-	sleep 3
 	./blazium/bin/blazium.$PLATFORM.editor.$EXT --export-release "$EXPORT_NAME" ./demo/project.godot
 	echo "!!!! Done building release blazium"
 	cd ..
@@ -447,11 +445,9 @@ for param in "$@"; do
 			;;
 		download)
 			download
-			sleep 1
 			;;
 		patch=+([0-9]))
 			patch "$param"
-			sleep 1
 			;;
 		linker=+(*))
 			linker "$param"
@@ -464,26 +460,21 @@ for param in "$@"; do
 			;;
 		reset)
 			reset
-			sleep 1
 			;;
 		engines)
 			engines
-			sleep 5
 			;;
 		benchmarks)
 			benchmarks
-			sleep 5
 			;;
 		run)
 			run
-			sleep 1
 			;;
 		show)
 			show
 			;;
 		clean)
 			clean
-			sleep 1
 			;;
 		*)
 			help
