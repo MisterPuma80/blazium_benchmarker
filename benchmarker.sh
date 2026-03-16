@@ -120,6 +120,45 @@ remove_llvm_ext() {
 	fi
 }
 
+get_clang_info() {
+	# Make sure the path exists
+	if [[ ! -e "$1" ]]; then
+		echo -1
+		return
+	fi
+
+	# Get all clang version info macros
+	local macros
+	macros=$("$1" -dM -E -x c++ /dev/null 2> /dev/null)
+
+	if [[ -z "$macros" ]]; then
+		#echo "Error: clang++ not found or failed to execute."
+		echo -1
+		return
+	fi
+
+	# Get semantic version number
+	local major minor patch
+	major=$(echo "$macros" | grep "__clang_major__" | awk '{print $3}')
+	minor=$(echo "$macros" | grep "__clang_minor__" | awk '{print $3}')
+	patch=$(echo "$macros" | grep "__clang_patchlevel__" | awk '{print $3}')
+
+	# Get cpu architecture
+	local arch="unknown"
+	if echo "$macros" | grep -qE "__x86_64__ 1$"; then
+		arch="x86_64"
+	elif echo "$macros" | grep -qE "__i386__ 1$"; then
+		arch="x86"
+	elif echo "$macros" | grep -qE "(__aarch64__|__arm64__) 1$"; then
+		arch="arm64"
+	elif echo "$macros" | grep -qE "__arm__ 1$"; then
+		arch="arm32"
+	fi
+
+	# Return full version and architecture
+	echo "Clang++ ${major}.${minor}.${patch} ($arch)"
+}
+
 download_blazium_4_5() {
 	# Download Blazium
 	if [ ! -d "blazium" ]; then
@@ -144,11 +183,61 @@ download_blazium_4_5() {
 }
 
 build_blazium() {
-	# Build Blazium editor and export templates
 	cd blazium
+
+	# Remove built engine binaries and temp files
 	rm -f bin/*.x86_64
 	rm -f bin/*.llvm
 	rm -f bin/*.exe
+	rm -f build_env
+	rm -f generate_build_env.py
+
+	# Make a custom SConstruct that can examine the scons envs
+	cat > generate_build_env.py <<EOF
+import sys
+import shutil
+Import("env")
+
+# Write the envs to file
+cxx_path = shutil.which(env.subst('$CXX'))
+with open('build_env', 'w') as f:
+	f.write(f"cxx_path={cxx_path}\n")
+	f.write(f"CXX={env.subst('$CXX')}\n")
+	f.write(f"LINK={env.subst('$LINK')}\n")
+	f.write(f"linker={env.subst('$linker')}\n")
+
+# Exit immediately, because we don't want to actually build
+sys.exit(0)
+
+EOF
+
+	# Write the actual environment variables scons uses to the 'build_env' file
+	set +x
+	local build_env
+	build_env=$(scons platform=$PLATFORM target=editor dev_build=no dev_mode=no $COMPILER_AND_LINKER tests=no execinfo=yes scu_build=yes -j $BUILD_CORES --file=SConstruct --file=generate_build_env.py -n)
+	set -x
+
+	# Read the envs from 'build_env' into an array
+	local config
+	declare -A config
+	while IFS='=' read -r key value; do
+		# Skip empty lines and comments
+		[[ -z "$key" || "$key" =~ ^# ]] && continue
+
+		config["$key"]="$value"
+	done < "build_env"
+
+	# Get the actual compiler version used
+	# FIXME: This assumes clang. Make it work for gcc and msvc too
+	set +x
+	local compiler_version
+	compiler_version=$(get_clang_info "${config[cxx_path]}")
+	set -x
+
+	echo "${config[cxx_path]}"
+	echo "$compiler_version"
+
+	# Build Blazium editor and export templates
 	scons platform=$PLATFORM target=editor dev_build=no dev_mode=no $COMPILER_AND_LINKER tests=no execinfo=yes scu_build=yes -j $BUILD_CORES
 	scons platform=$PLATFORM target=template_release dev_build=no dev_mode=no $COMPILER_AND_LINKER scu_build=yes -j $BUILD_CORES
 	remove_llvm_ext bin/blazium.$PLATFORM.editor.x86_64.llvm
