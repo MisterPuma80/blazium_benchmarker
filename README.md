@@ -14,7 +14,7 @@ git checkout master
 # Add your benchmarks to example_blazium_4.5_modified/src/gdexample.cpp ...
 
 # Build everything and run benchmarks
-./benchmarker.sh engine benchmarks run show
+./benchmarker.sh engines benchmarks run show
 
 ```
 
@@ -30,11 +30,11 @@ cd blazium_benchmarker
 
 # Run patch benchmark
 git checkout blazium_patch_597
-./benchmarker.sh reset patch:597 engine benchmarks run show
+./benchmarker.sh reset patch:597 engines benchmarks run show
 
 # Run different patch benchmark
 git checkout blazium_patch_602
-./benchmarker.sh reset patch:602 cores:10 linker:mold use_llvm:yes engine benchmarks run show
+./benchmarker.sh reset patch:602 cores:10 linker:mold use_llvm:yes engines benchmarks run show
 ```
 
 # Requirements

@@ -177,7 +177,7 @@ download() {
 	set +x
 }
 
-engine() {
+engines() {
 	set -x
 
 	cd example_blazium_4.5
@@ -423,13 +423,13 @@ reset() {
 
 help() {
 	echo "./benchmarker.sh help - Prints help."
-	echo "./benchmarker.sh download - Downloads engine, export templates, and cpp api bindings"
+	echo "./benchmarker.sh download - Downloads engines, export templates, and cpp api bindings"
 	echo "./benchmarker.sh patch:github_pr_# - Downloads and applies a github PR patch"
 	echo "./benchmarker.sh linker:name - The linker to use. Default system default."
 	echo "./benchmarker.sh use_llvm:yes or no - To use LLVM or not. Defaults to no."
 	echo "./benchmarker.sh cores:number - The number of cpu cores to use for -j."
 	echo "./benchmarker.sh reset - Resets any changes to engine code, but ignores unknown files"
-	echo "./benchmarker.sh engine - Builds engine, export templates, and dumps api json file"
+	echo "./benchmarker.sh engines - Builds engines, export templates, and dumps api json file"
 	echo "./benchmarker.sh benchmarks - Builds benchmarks as a game"
 	echo "./benchmarker.sh run - Runs benchmarks"
 	echo "./benchmarker.sh show - Shows benchmarks"
@@ -466,8 +466,8 @@ for param in "$@"; do
 			reset
 			sleep 1
 			;;
-		engine)
-			engine
+		engines)
+			engines
 			sleep 5
 			;;
 		benchmarks)
