@@ -369,10 +369,10 @@ clean() {
 patch() {
 	set -x
 
+	local prefix raw_url encoded_url
 	IFS="=" read -r prefix raw_url <<< "$1"
 
 	mkdir -p patches
-	local encoded_url
 	encoded_url=$(url_to_filename "$raw_url")
 	curl -L -o patches/$encoded_url $raw_url
 
@@ -388,6 +388,7 @@ patch() {
 linker() {
 	set -x
 
+	local prefix linker_name
 	IFS="=" read -r prefix linker_name <<< "$1"
 
 	LINKER="linker=$linker_name"
@@ -400,6 +401,7 @@ linker() {
 use_llvm() {
 	set -x
 
+	local prefix use_llvm
 	IFS="=" read -r prefix use_llvm <<< "$1"
 
 	COMPILER="use_llvm=$use_llvm"
@@ -412,6 +414,7 @@ use_llvm() {
 cores() {
 	set -x
 
+	local prefix cores
 	IFS="=" read -r prefix cores <<< "$1"
 
 	BUILD_CORES=$cores
