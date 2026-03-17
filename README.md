@@ -10,17 +10,32 @@ git checkout benchmark_to_upper_to_lower
 # Download engines
 ./benchmarker.sh download
 
-# Download and patch engine with PR code
-./benchmarker.sh reset patch:597 engine benchmarks run show
+# Modify the engine code at example_blazium_4.5_modified/blazium ...
+# Add your benchmarks to example_blazium_4.5_modified/src/gdexample.cpp ...
 
-# Build engines and benchmark game
-./benchmarker.sh engine benchmarks run show
+# Build everything and run benchmarks
+./benchmarker.sh engines benchmarks run show
 
-# Run benchmarks and show graph
-./benchmarker.sh run show
+# Run again using different compiler and linker settings
+./benchmarker.sh cores=10 linker=mold use_llvm=yes engines benchmarks run show
 
-# Or run patch benchmark with clang and mold
-./benchmarker.sh reset linker:mold use_llvm:yes patch:597 engine benchmarks run show
+```
+
+# Benchmark Blazium PRs
+```sh
+# Checkout repo
+git clone https://github.com/MisterPuma80/blazium_benchmarker
+cd blazium_benchmarker
+
+# Download engines
+./benchmarker.sh download
+
+# Install patch into modified blazium
+./benchmarker.sh reset patch=https://github.com/blazium-games/blazium/pull/597.patch
+
+# Run benchmark
+./benchmarker.sh engines benchmarks run show
+
 ```
 
 # Requirements
