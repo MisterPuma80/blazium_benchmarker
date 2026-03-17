@@ -143,7 +143,7 @@ print(clean)
 " "$1"
 }
 
-download_blazium_4_5() {
+_download_blazium_4_5() {
 	# Download Blazium
 	if [ ! -d "blazium" ]; then
 		git clone https://github.com/blazium-engine/blazium
@@ -166,7 +166,7 @@ download_blazium_4_5() {
 	fi
 }
 
-build_blazium() {
+_build_blazium() {
 	# Build Blazium editor and export templates
 	cd blazium
 	rm -f bin/*.x86_64
@@ -190,11 +190,11 @@ download() {
 	set -x
 
 	cd example_blazium_4.5
-	download_blazium_4_5
+	_download_blazium_4_5
 	cd ..
 
 	cd example_blazium_4.5_modified
-	download_blazium_4_5
+	_download_blazium_4_5
 	cd ..
 
 	set +x
@@ -204,11 +204,11 @@ engines() {
 	set -x
 
 	cd example_blazium_4.5
-	build_blazium
+	_build_blazium
 	cd ..
 
 	cd example_blazium_4.5_modified
-	build_blazium
+	_build_blazium
 	cd ..
 
 	set +x
@@ -284,7 +284,7 @@ show() {
 	set +x
 }
 
-clean_blazium() {
+_clean_blazium() {
 	rm -f .sconsign.dblite
 	rm -f src/gdexample.os
 	rm -f src/register_types.os
@@ -330,11 +330,11 @@ clean() {
 	set -x
 
 	cd example_blazium_4.5
-	clean_blazium
+	_clean_blazium
 	cd ..
 
 	cd example_blazium_4.5_modified
-	clean_blazium
+	_clean_blazium
 	cd ..
 
 	set +x
@@ -397,7 +397,7 @@ cores() {
 	set +x
 }
 
-reset_blazium() {
+_reset_blazium() {
 	if [ -d "blazium" ]; then
 		cd blazium
 		git reset --hard HEAD
@@ -415,11 +415,11 @@ reset() {
 	set -x
 
 	cd example_blazium_4.5_modified
-	reset_blazium
+	_reset_blazium
 	cd ..
 
 	cd example_blazium_4.5
-	reset_blazium
+	_reset_blazium
 	cd ..
 
 	set +x
