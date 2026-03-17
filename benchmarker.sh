@@ -308,6 +308,8 @@ clean() {
 		rm -rf .sconsign5.dblite
 		rm -rf config.log
 		rm -f -rf .sconf_temp
+		rm -f build_env
+		rm -f generate_build_env.py
 		cd ..
 	fi
 
@@ -347,6 +349,8 @@ clean() {
 		rm -rf .sconsign5.dblite
 		rm -rf config.log
 		rm -f -rf .sconf_temp
+		rm -f build_env
+		rm -f generate_build_env.py
 		cd ..
 	fi
 
