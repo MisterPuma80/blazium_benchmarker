@@ -397,25 +397,29 @@ cores() {
 	set +x
 }
 
+reset_blazium() {
+	if [ -d "blazium" ]; then
+		cd blazium
+		git reset --hard HEAD
+		cd ..
+	fi
+
+	if [ -d "blazium-cpp" ]; then
+		cd blazium-cpp
+		git reset --hard HEAD
+		cd ..
+	fi
+}
+
 reset() {
 	set -x
 
 	cd example_blazium_4.5_modified
-	cd blazium
-	git reset --hard HEAD
-	cd ..
-	cd blazium-cpp
-	git reset --hard HEAD
-	cd ..
+	reset_blazium
 	cd ..
 
 	cd example_blazium_4.5
-	cd blazium
-	git reset --hard HEAD
-	cd ..
-	cd blazium-cpp
-	git reset --hard HEAD
-	cd ..
+	reset_blazium
 	cd ..
 
 	set +x
