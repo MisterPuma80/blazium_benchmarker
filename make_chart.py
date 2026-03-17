@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 ############################################################################
 #  make_chart.py                                                           #
@@ -172,7 +172,7 @@ if __name__ == "__main__":
 
 	# Add footer
 	colored += "| " + ("-" * (line_len - 4)) + " |\n"
-	colored += "| " + "Average time in nanoseconds. {0} iterations each test.".format(iterations).ljust(line_len - 4) + " |\n"
+	colored += "| " + "Average time in nanoseconds. {0} iterations per test.".format(iterations).ljust(line_len - 4) + " |\n"
 	colored += "| " + ("-" * (line_len - 4)) + " |\n"
 
 	print(colored)
