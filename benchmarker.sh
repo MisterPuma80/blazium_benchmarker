@@ -307,6 +307,8 @@ clean_blazium() {
 		rm -f -rf .sconf_temp
 		rm -f build_env
 		rm -f generate_build_env.py
+
+		git clean -fd
 		cd ..
 	fi
 
@@ -318,6 +320,8 @@ clean_blazium() {
 		git restore gdextension/extension_api.json
 		find . -type d -name "__pycache__" -exec rm -rf {} +
 		rm -f .sconsign.dblite
+
+		git clean -fd
 		cd ..
 	fi
 }
