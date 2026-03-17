@@ -143,7 +143,7 @@ print(clean)
 " "$1"
 }
 
-download_blazium_4_5() {
+_download_blazium_4_5() {
 	# Download Blazium
 	if [ ! -d "blazium" ]; then
 		git clone https://github.com/blazium-engine/blazium
@@ -166,7 +166,7 @@ download_blazium_4_5() {
 	fi
 }
 
-build_blazium() {
+_build_blazium() {
 	# Build Blazium editor and export templates
 	cd blazium
 	rm -f bin/*.x86_64
@@ -186,35 +186,129 @@ build_blazium() {
 	cd ../..
 }
 
-download() {
+_reset_blazium() {
+	if [ -d "blazium" ]; then
+		cd blazium
+		git reset --hard HEAD
+		cd ..
+	fi
+
+	if [ -d "blazium-cpp" ]; then
+		cd blazium-cpp
+		git reset --hard HEAD
+		cd ..
+	fi
+}
+
+_clean_blazium() {
+	rm -f .sconsign.dblite
+	rm -f src/gdexample.os
+	rm -f src/register_types.os
+	rm -f demo/bin/*.so
+	rm -rf -f demo/export
+
+	if [ -d "blazium" ]; then
+		cd blazium
+		scons platform=$PLATFORM target=editor dev_build=no dev_mode=no $COMPILER_AND_LINKER tests=no execinfo=yes scu_build=yes -c
+		scons platform=$PLATFORM target=template_release dev_build=no dev_mode=no $COMPILER_AND_LINKER scu_build=yes -c
+		find . -name "*.gen.cpp" -delete
+		find . -type d -name "__pycache__" -exec rm -rf {} +
+		find . -type d -name "scu" -exec rm -rf {} +
+		rm -f -rf bin
+		rm -f -rf platform/linuxbsd/wayland/protocol
+		rm -f .scons_env.json
+		rm -rf .scons_node_count
+		rm -rf .sconsign5.dblite
+		rm -rf config.log
+		rm -f -rf .sconf_temp
+		rm -f build_env
+		rm -f generate_build_env.py
+
+		git clean -fd
+		cd ..
+	fi
+
+	if [ -d "blazium-cpp" ]; then
+		cd blazium-cpp
+		scons platform=$PLATFORM_TEMPLATES target=editor -c
+		scons platform=$PLATFORM_TEMPLATES target=template_release -c
+		git restore gdextension/gdextension_interface.h
+		git restore gdextension/extension_api.json
+		find . -type d -name "__pycache__" -exec rm -rf {} +
+		rm -f .sconsign.dblite
+
+		git clean -fd
+		cd ..
+	fi
+}
+
+set_linker() {
+	set -x
+
+	local prefix linker_name
+	IFS="=" read -r prefix linker_name <<< "$1"
+
+	LINKER="linker=$linker_name"
+	COMPILER_AND_LINKER="$COMPILER $LINKER"
+	#echo $COMPILER_AND_LINKER
+
+	set +x
+}
+
+set_use_llvm() {
+	set -x
+
+	local prefix use_llvm
+	IFS="=" read -r prefix use_llvm <<< "$1"
+
+	COMPILER="use_llvm=$use_llvm"
+	COMPILER_AND_LINKER="$COMPILER $LINKER"
+	#echo $COMPILER_AND_LINKER
+
+	set +x
+}
+
+set_cores() {
+	set -x
+
+	local prefix cores
+	IFS="=" read -r prefix cores <<< "$1"
+
+	BUILD_CORES=$cores
+	#echo $BUILD_CORES
+
+	set +x
+}
+
+do_download() {
 	set -x
 
 	cd example_blazium_4.5
-	download_blazium_4_5
+	_download_blazium_4_5
 	cd ..
 
 	cd example_blazium_4.5_modified
-	download_blazium_4_5
+	_download_blazium_4_5
 	cd ..
 
 	set +x
 }
 
-engines() {
+do_engines() {
 	set -x
 
 	cd example_blazium_4.5
-	build_blazium
+	_build_blazium
 	cd ..
 
 	cd example_blazium_4.5_modified
-	build_blazium
+	_build_blazium
 	cd ..
 
 	set +x
 }
 
-benchmarks() {
+do_benchmarks() {
 	set -x
 
 	echo "Building Blazium 4.5 ..."
@@ -240,7 +334,7 @@ benchmarks() {
 	set +x
 }
 
-run() {
+do_run() {
 	set -x
 
 	# If on Linux, constantly refresh sudo in a sub process that is killed at exit
@@ -276,7 +370,7 @@ run() {
 	set +x
 }
 
-show() {
+do_show() {
 	set -x
 
 	$PYTHON make_chart.py --iterations $ITERATIONS
@@ -284,89 +378,7 @@ show() {
 	set +x
 }
 
-clean() {
-	set -x
-
-	cd example_blazium_4.5_modified
-	rm -f .sconsign.dblite
-	rm -f src/gdexample.os
-	rm -f src/register_types.os
-	rm -f demo/bin/*.so
-	rm -rf -f demo/export
-
-	if [ -d "blazium" ]; then
-		cd blazium
-		scons platform=$PLATFORM target=editor dev_build=no dev_mode=no $COMPILER_AND_LINKER tests=no execinfo=yes scu_build=yes -c
-		scons platform=$PLATFORM target=template_release dev_build=no dev_mode=no $COMPILER_AND_LINKER scu_build=yes -c
-		find . -name "*.gen.cpp" -delete
-		find . -type d -name "__pycache__" -exec rm -rf {} +
-		find . -type d -name "scu" -exec rm -rf {} +
-		rm -f -rf bin
-		rm -f -rf platform/linuxbsd/wayland/protocol
-		rm -f .scons_env.json
-		rm -rf .scons_node_count
-		rm -rf .sconsign5.dblite
-		rm -rf config.log
-		rm -f -rf .sconf_temp
-		cd ..
-	fi
-
-	if [ -d "blazium-cpp" ]; then
-		cd blazium-cpp
-		scons platform=$PLATFORM_TEMPLATES target=editor -c
-		scons platform=$PLATFORM_TEMPLATES target=template_release -c
-		git restore gdextension/gdextension_interface.h
-		git restore gdextension/extension_api.json
-		find . -type d -name "__pycache__" -exec rm -rf {} +
-		rm -f .sconsign.dblite
-		cd ..
-	fi
-
-	cd ..
-
-
-
-	cd example_blazium_4.5
-	rm -f .sconsign.dblite
-	rm -f src/gdexample.os
-	rm -f src/register_types.os
-	rm -f demo/bin/*.so
-	rm -rf -f demo/export
-
-	if [ -d "blazium" ]; then
-		cd blazium
-		scons platform=$PLATFORM target=editor dev_build=no dev_mode=no $COMPILER_AND_LINKER tests=no execinfo=yes scu_build=yes -c
-		scons platform=$PLATFORM target=template_release dev_build=no dev_mode=no $COMPILER_AND_LINKER scu_build=yes -c
-		find . -name "*.gen.cpp" -delete
-		find . -type d -name "__pycache__" -exec rm -rf {} +
-		find . -type d -name "scu" -exec rm -rf {} +
-		rm -f -rf bin
-		rm -f -rf platform/linuxbsd/wayland/protocol
-		rm -f .scons_env.json
-		rm -rf .scons_node_count
-		rm -rf .sconsign5.dblite
-		rm -rf config.log
-		rm -f -rf .sconf_temp
-		cd ..
-	fi
-
-	if [ -d "blazium-cpp" ]; then
-		cd blazium-cpp
-		scons platform=$PLATFORM_TEMPLATES target=editor -c
-		scons platform=$PLATFORM_TEMPLATES target=template_release -c
-		git restore gdextension/gdextension_interface.h
-		git restore gdextension/extension_api.json
-		find . -type d -name "__pycache__" -exec rm -rf {} +
-		rm -f .sconsign.dblite
-		cd ..
-	fi
-
-	cd ..
-
-	set +x
-}
-
-patch() {
+do_patch() {
 	set -x
 
 	local prefix raw_url encoded_url
@@ -385,127 +397,93 @@ patch() {
 	set +x
 }
 
-linker() {
-	set -x
-
-	local prefix linker_name
-	IFS="=" read -r prefix linker_name <<< "$1"
-
-	LINKER="linker=$linker_name"
-	COMPILER_AND_LINKER="$COMPILER $LINKER"
-	#echo $COMPILER_AND_LINKER
-
-	set +x
-}
-
-use_llvm() {
-	set -x
-
-	local prefix use_llvm
-	IFS="=" read -r prefix use_llvm <<< "$1"
-
-	COMPILER="use_llvm=$use_llvm"
-	COMPILER_AND_LINKER="$COMPILER $LINKER"
-	#echo $COMPILER_AND_LINKER
-
-	set +x
-}
-
-cores() {
-	set -x
-
-	local prefix cores
-	IFS="=" read -r prefix cores <<< "$1"
-
-	BUILD_CORES=$cores
-	#echo $BUILD_CORES
-
-	set +x
-}
-
-reset() {
+do_reset() {
 	set -x
 
 	cd example_blazium_4.5_modified
-	cd blazium
-	git reset --hard HEAD
-	cd ..
-	cd blazium-cpp
-	git reset --hard HEAD
-	cd ..
+	_reset_blazium
 	cd ..
 
 	cd example_blazium_4.5
-	cd blazium
-	git reset --hard HEAD
-	cd ..
-	cd blazium-cpp
-	git reset --hard HEAD
-	cd ..
+	_reset_blazium
 	cd ..
 
 	set +x
 }
 
-help() {
-	echo "./benchmarker.sh help - Prints help."
+do_clean() {
+	set -x
+
+	cd example_blazium_4.5
+	_clean_blazium
+	cd ..
+
+	cd example_blazium_4.5_modified
+	_clean_blazium
+	cd ..
+
+	set +x
+}
+
+do_help() {
+	echo "./benchmarker.sh help - Prints help"
+	echo "./benchmarker.sh linker=name - Set the linker to use. Defaults to default"
+	echo "./benchmarker.sh use_llvm=yes or no - Set to use LLVM or not. Defaults to no"
+	echo "./benchmarker.sh cores=number - Set the number of cpu cores to use when building"
 	echo "./benchmarker.sh download - Downloads engines, export templates, and cpp api bindings"
 	echo "./benchmarker.sh patch=URL.patch - Downloads and applies a git patch"
-	echo "./benchmarker.sh linker=name - The linker to use. Default system default."
-	echo "./benchmarker.sh use_llvm=yes or no - To use LLVM or not. Defaults to no."
-	echo "./benchmarker.sh cores=number - The number of cpu cores to use for -j."
-	echo "./benchmarker.sh reset - Resets any changes to engine code, but ignores unknown files"
 	echo "./benchmarker.sh engines - Builds engines, export templates, and dumps api json file"
 	echo "./benchmarker.sh benchmarks - Builds benchmarks as a game"
 	echo "./benchmarker.sh run - Runs benchmarks"
 	echo "./benchmarker.sh show - Shows benchmarks"
-	echo "./benchmarker.sh clean - Deletes generated files"
+	echo "./benchmarker.sh reset - Resets any changes to engine code, but ignores unknown files"
+	echo "./benchmarker.sh clean - Deletes generated files in engine code"
 }
 
 if [ $# -eq 0 ]; then
-	help
+	do_help
 fi
 
 for param in "$@"; do
 	case "$param" in
 		help)
-			help
-			;;
-		download)
-			download
-			;;
-		patch=+(*))
-			patch "$param"
+			do_help
 			;;
 		linker=+(*))
-			linker "$param"
+			set_linker "$param"
 			;;
 		use_llvm=+(*))
-			use_llvm "$param"
+			set_use_llvm "$param"
 			;;
 		cores=+([0-9]))
-			cores "$param"
+			set_cores "$param"
 			;;
-		reset)
-			reset
+		download)
+			do_download
+			;;
+		patch=+(*))
+			do_patch "$param"
 			;;
 		engines)
-			engines
+			do_engines
 			;;
 		benchmarks)
-			benchmarks
+			do_benchmarks
 			;;
 		run)
-			run
+			do_run
 			;;
 		show)
-			show
+			do_show
+			;;
+		reset)
+			do_reset
 			;;
 		clean)
-			clean
+			do_clean
 			;;
 		*)
-			help
+			do_help
 			exit 1
 			;;
 	esac
