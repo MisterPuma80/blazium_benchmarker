@@ -242,6 +242,44 @@ _clean_blazium() {
 	fi
 }
 
+set_linker() {
+	set -x
+
+	local prefix linker_name
+	IFS="=" read -r prefix linker_name <<< "$1"
+
+	LINKER="linker=$linker_name"
+	COMPILER_AND_LINKER="$COMPILER $LINKER"
+	#echo $COMPILER_AND_LINKER
+
+	set +x
+}
+
+set_use_llvm() {
+	set -x
+
+	local prefix use_llvm
+	IFS="=" read -r prefix use_llvm <<< "$1"
+
+	COMPILER="use_llvm=$use_llvm"
+	COMPILER_AND_LINKER="$COMPILER $LINKER"
+	#echo $COMPILER_AND_LINKER
+
+	set +x
+}
+
+set_cores() {
+	set -x
+
+	local prefix cores
+	IFS="=" read -r prefix cores <<< "$1"
+
+	BUILD_CORES=$cores
+	#echo $BUILD_CORES
+
+	set +x
+}
+
 do_download() {
 	set -x
 
@@ -359,44 +397,6 @@ do_patch() {
 	set +x
 }
 
-set_linker() {
-	set -x
-
-	local prefix linker_name
-	IFS="=" read -r prefix linker_name <<< "$1"
-
-	LINKER="linker=$linker_name"
-	COMPILER_AND_LINKER="$COMPILER $LINKER"
-	#echo $COMPILER_AND_LINKER
-
-	set +x
-}
-
-set_use_llvm() {
-	set -x
-
-	local prefix use_llvm
-	IFS="=" read -r prefix use_llvm <<< "$1"
-
-	COMPILER="use_llvm=$use_llvm"
-	COMPILER_AND_LINKER="$COMPILER $LINKER"
-	#echo $COMPILER_AND_LINKER
-
-	set +x
-}
-
-set_cores() {
-	set -x
-
-	local prefix cores
-	IFS="=" read -r prefix cores <<< "$1"
-
-	BUILD_CORES=$cores
-	#echo $BUILD_CORES
-
-	set +x
-}
-
 do_reset() {
 	set -x
 
@@ -426,12 +426,12 @@ do_clean() {
 }
 
 do_help() {
-	echo "./benchmarker.sh help - Prints help."
+	echo "./benchmarker.sh help - Prints help"
+	echo "./benchmarker.sh linker=name - Set the linker to use. Defaults to default"
+	echo "./benchmarker.sh use_llvm=yes or no - Set to use LLVM or not. Defaults to no"
+	echo "./benchmarker.sh cores=number - Set the number of cpu cores to use when building"
 	echo "./benchmarker.sh download - Downloads engines, export templates, and cpp api bindings"
 	echo "./benchmarker.sh patch=URL.patch - Downloads and applies a git patch"
-	echo "./benchmarker.sh linker=name - The linker to use. Default system default."
-	echo "./benchmarker.sh use_llvm=yes or no - To use LLVM or not. Defaults to no."
-	echo "./benchmarker.sh cores=number - The number of cpu cores to use for -j."
 	echo "./benchmarker.sh engines - Builds engines, export templates, and dumps api json file"
 	echo "./benchmarker.sh benchmarks - Builds benchmarks as a game"
 	echo "./benchmarker.sh run - Runs benchmarks"
@@ -449,12 +449,6 @@ for param in "$@"; do
 		help)
 			do_help
 			;;
-		download)
-			do_download
-			;;
-		patch=+(*))
-			do_patch "$param"
-			;;
 		linker=+(*))
 			set_linker "$param"
 			;;
@@ -464,8 +458,11 @@ for param in "$@"; do
 		cores=+([0-9]))
 			set_cores "$param"
 			;;
-		reset)
-			do_reset
+		download)
+			do_download
+			;;
+		patch=+(*))
+			do_patch "$param"
 			;;
 		engines)
 			do_engines
@@ -478,6 +475,9 @@ for param in "$@"; do
 			;;
 		show)
 			do_show
+			;;
+		reset)
+			do_reset
 			;;
 		clean)
 			do_clean
