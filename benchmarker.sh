@@ -186,6 +186,62 @@ _build_blazium() {
 	cd ../..
 }
 
+_reset_blazium() {
+	if [ -d "blazium" ]; then
+		cd blazium
+		git reset --hard HEAD
+		cd ..
+	fi
+
+	if [ -d "blazium-cpp" ]; then
+		cd blazium-cpp
+		git reset --hard HEAD
+		cd ..
+	fi
+}
+
+_clean_blazium() {
+	rm -f .sconsign.dblite
+	rm -f src/gdexample.os
+	rm -f src/register_types.os
+	rm -f demo/bin/*.so
+	rm -rf -f demo/export
+
+	if [ -d "blazium" ]; then
+		cd blazium
+		scons platform=$PLATFORM target=editor dev_build=no dev_mode=no $COMPILER_AND_LINKER tests=no execinfo=yes scu_build=yes -c
+		scons platform=$PLATFORM target=template_release dev_build=no dev_mode=no $COMPILER_AND_LINKER scu_build=yes -c
+		find . -name "*.gen.cpp" -delete
+		find . -type d -name "__pycache__" -exec rm -rf {} +
+		find . -type d -name "scu" -exec rm -rf {} +
+		rm -f -rf bin
+		rm -f -rf platform/linuxbsd/wayland/protocol
+		rm -f .scons_env.json
+		rm -rf .scons_node_count
+		rm -rf .sconsign5.dblite
+		rm -rf config.log
+		rm -f -rf .sconf_temp
+		rm -f build_env
+		rm -f generate_build_env.py
+
+		git clean -fd
+		cd ..
+	fi
+
+	if [ -d "blazium-cpp" ]; then
+		cd blazium-cpp
+		scons platform=$PLATFORM_TEMPLATES target=editor -c
+		scons platform=$PLATFORM_TEMPLATES target=template_release -c
+		git restore gdextension/gdextension_interface.h
+		git restore gdextension/extension_api.json
+		find . -type d -name "__pycache__" -exec rm -rf {} +
+		rm -f .sconsign.dblite
+
+		git clean -fd
+		cd ..
+	fi
+}
+
 download() {
 	set -x
 
@@ -284,62 +340,6 @@ show() {
 	set +x
 }
 
-_clean_blazium() {
-	rm -f .sconsign.dblite
-	rm -f src/gdexample.os
-	rm -f src/register_types.os
-	rm -f demo/bin/*.so
-	rm -rf -f demo/export
-
-	if [ -d "blazium" ]; then
-		cd blazium
-		scons platform=$PLATFORM target=editor dev_build=no dev_mode=no $COMPILER_AND_LINKER tests=no execinfo=yes scu_build=yes -c
-		scons platform=$PLATFORM target=template_release dev_build=no dev_mode=no $COMPILER_AND_LINKER scu_build=yes -c
-		find . -name "*.gen.cpp" -delete
-		find . -type d -name "__pycache__" -exec rm -rf {} +
-		find . -type d -name "scu" -exec rm -rf {} +
-		rm -f -rf bin
-		rm -f -rf platform/linuxbsd/wayland/protocol
-		rm -f .scons_env.json
-		rm -rf .scons_node_count
-		rm -rf .sconsign5.dblite
-		rm -rf config.log
-		rm -f -rf .sconf_temp
-		rm -f build_env
-		rm -f generate_build_env.py
-
-		git clean -fd
-		cd ..
-	fi
-
-	if [ -d "blazium-cpp" ]; then
-		cd blazium-cpp
-		scons platform=$PLATFORM_TEMPLATES target=editor -c
-		scons platform=$PLATFORM_TEMPLATES target=template_release -c
-		git restore gdextension/gdextension_interface.h
-		git restore gdextension/extension_api.json
-		find . -type d -name "__pycache__" -exec rm -rf {} +
-		rm -f .sconsign.dblite
-
-		git clean -fd
-		cd ..
-	fi
-}
-
-clean() {
-	set -x
-
-	cd example_blazium_4.5
-	_clean_blazium
-	cd ..
-
-	cd example_blazium_4.5_modified
-	_clean_blazium
-	cd ..
-
-	set +x
-}
-
 patch() {
 	set -x
 
@@ -397,20 +397,6 @@ cores() {
 	set +x
 }
 
-_reset_blazium() {
-	if [ -d "blazium" ]; then
-		cd blazium
-		git reset --hard HEAD
-		cd ..
-	fi
-
-	if [ -d "blazium-cpp" ]; then
-		cd blazium-cpp
-		git reset --hard HEAD
-		cd ..
-	fi
-}
-
 reset() {
 	set -x
 
@@ -425,6 +411,20 @@ reset() {
 	set +x
 }
 
+clean() {
+	set -x
+
+	cd example_blazium_4.5
+	_clean_blazium
+	cd ..
+
+	cd example_blazium_4.5_modified
+	_clean_blazium
+	cd ..
+
+	set +x
+}
+
 help() {
 	echo "./benchmarker.sh help - Prints help."
 	echo "./benchmarker.sh download - Downloads engines, export templates, and cpp api bindings"
@@ -432,12 +432,12 @@ help() {
 	echo "./benchmarker.sh linker=name - The linker to use. Default system default."
 	echo "./benchmarker.sh use_llvm=yes or no - To use LLVM or not. Defaults to no."
 	echo "./benchmarker.sh cores=number - The number of cpu cores to use for -j."
-	echo "./benchmarker.sh reset - Resets any changes to engine code, but ignores unknown files"
 	echo "./benchmarker.sh engines - Builds engines, export templates, and dumps api json file"
 	echo "./benchmarker.sh benchmarks - Builds benchmarks as a game"
 	echo "./benchmarker.sh run - Runs benchmarks"
 	echo "./benchmarker.sh show - Shows benchmarks"
-	echo "./benchmarker.sh clean - Deletes generated files"
+	echo "./benchmarker.sh reset - Resets any changes to engine code, but ignores unknown files"
+	echo "./benchmarker.sh clean - Deletes generated files in engine code"
 }
 
 if [ $# -eq 0 ]; then
