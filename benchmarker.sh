@@ -242,7 +242,7 @@ _clean_blazium() {
 	fi
 }
 
-download() {
+do_download() {
 	set -x
 
 	cd example_blazium_4.5
@@ -256,7 +256,7 @@ download() {
 	set +x
 }
 
-engines() {
+do_engines() {
 	set -x
 
 	cd example_blazium_4.5
@@ -270,7 +270,7 @@ engines() {
 	set +x
 }
 
-benchmarks() {
+do_benchmarks() {
 	set -x
 
 	echo "Building Blazium 4.5 ..."
@@ -296,7 +296,7 @@ benchmarks() {
 	set +x
 }
 
-run() {
+do_run() {
 	set -x
 
 	# If on Linux, constantly refresh sudo in a sub process that is killed at exit
@@ -332,7 +332,7 @@ run() {
 	set +x
 }
 
-show() {
+do_show() {
 	set -x
 
 	$PYTHON make_chart.py --iterations $ITERATIONS
@@ -340,7 +340,7 @@ show() {
 	set +x
 }
 
-patch() {
+do_patch() {
 	set -x
 
 	local prefix raw_url encoded_url
@@ -359,7 +359,7 @@ patch() {
 	set +x
 }
 
-linker() {
+set_linker() {
 	set -x
 
 	local prefix linker_name
@@ -372,7 +372,7 @@ linker() {
 	set +x
 }
 
-use_llvm() {
+set_use_llvm() {
 	set -x
 
 	local prefix use_llvm
@@ -385,7 +385,7 @@ use_llvm() {
 	set +x
 }
 
-cores() {
+set_cores() {
 	set -x
 
 	local prefix cores
@@ -397,7 +397,7 @@ cores() {
 	set +x
 }
 
-reset() {
+do_reset() {
 	set -x
 
 	cd example_blazium_4.5_modified
@@ -411,7 +411,7 @@ reset() {
 	set +x
 }
 
-clean() {
+do_clean() {
 	set -x
 
 	cd example_blazium_4.5
@@ -425,7 +425,7 @@ clean() {
 	set +x
 }
 
-help() {
+do_help() {
 	echo "./benchmarker.sh help - Prints help."
 	echo "./benchmarker.sh download - Downloads engines, export templates, and cpp api bindings"
 	echo "./benchmarker.sh patch=URL.patch - Downloads and applies a git patch"
@@ -441,49 +441,49 @@ help() {
 }
 
 if [ $# -eq 0 ]; then
-	help
+	do_help
 fi
 
 for param in "$@"; do
 	case "$param" in
 		help)
-			help
+			do_help
 			;;
 		download)
-			download
+			do_download
 			;;
 		patch=+(*))
-			patch "$param"
+			do_patch "$param"
 			;;
 		linker=+(*))
-			linker "$param"
+			set_linker "$param"
 			;;
 		use_llvm=+(*))
-			use_llvm "$param"
+			set_use_llvm "$param"
 			;;
 		cores=+([0-9]))
-			cores "$param"
+			set_cores "$param"
 			;;
 		reset)
-			reset
+			do_reset
 			;;
 		engines)
-			engines
+			do_engines
 			;;
 		benchmarks)
-			benchmarks
+			do_benchmarks
 			;;
 		run)
-			run
+			do_run
 			;;
 		show)
-			show
+			do_show
 			;;
 		clean)
-			clean
+			do_clean
 			;;
 		*)
-			help
+			do_help
 			exit 1
 			;;
 	esac
