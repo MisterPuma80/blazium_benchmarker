@@ -284,87 +284,53 @@ show() {
 	set +x
 }
 
+clean_blazium() {
+	rm -f .sconsign.dblite
+	rm -f src/gdexample.os
+	rm -f src/register_types.os
+	rm -f demo/bin/*.so
+	rm -rf -f demo/export
+
+	if [ -d "blazium" ]; then
+		cd blazium
+		scons platform=$PLATFORM target=editor dev_build=no dev_mode=no $COMPILER_AND_LINKER tests=no execinfo=yes scu_build=yes -c
+		scons platform=$PLATFORM target=template_release dev_build=no dev_mode=no $COMPILER_AND_LINKER scu_build=yes -c
+		find . -name "*.gen.cpp" -delete
+		find . -type d -name "__pycache__" -exec rm -rf {} +
+		find . -type d -name "scu" -exec rm -rf {} +
+		rm -f -rf bin
+		rm -f -rf platform/linuxbsd/wayland/protocol
+		rm -f .scons_env.json
+		rm -rf .scons_node_count
+		rm -rf .sconsign5.dblite
+		rm -rf config.log
+		rm -f -rf .sconf_temp
+		rm -f build_env
+		rm -f generate_build_env.py
+		cd ..
+	fi
+
+	if [ -d "blazium-cpp" ]; then
+		cd blazium-cpp
+		scons platform=$PLATFORM_TEMPLATES target=editor -c
+		scons platform=$PLATFORM_TEMPLATES target=template_release -c
+		git restore gdextension/gdextension_interface.h
+		git restore gdextension/extension_api.json
+		find . -type d -name "__pycache__" -exec rm -rf {} +
+		rm -f .sconsign.dblite
+		cd ..
+	fi
+}
+
 clean() {
 	set -x
 
-	cd example_blazium_4.5_modified
-	rm -f .sconsign.dblite
-	rm -f src/gdexample.os
-	rm -f src/register_types.os
-	rm -f demo/bin/*.so
-	rm -rf -f demo/export
-
-	if [ -d "blazium" ]; then
-		cd blazium
-		scons platform=$PLATFORM target=editor dev_build=no dev_mode=no $COMPILER_AND_LINKER tests=no execinfo=yes scu_build=yes -c
-		scons platform=$PLATFORM target=template_release dev_build=no dev_mode=no $COMPILER_AND_LINKER scu_build=yes -c
-		find . -name "*.gen.cpp" -delete
-		find . -type d -name "__pycache__" -exec rm -rf {} +
-		find . -type d -name "scu" -exec rm -rf {} +
-		rm -f -rf bin
-		rm -f -rf platform/linuxbsd/wayland/protocol
-		rm -f .scons_env.json
-		rm -rf .scons_node_count
-		rm -rf .sconsign5.dblite
-		rm -rf config.log
-		rm -f -rf .sconf_temp
-		rm -f build_env
-		rm -f generate_build_env.py
-		cd ..
-	fi
-
-	if [ -d "blazium-cpp" ]; then
-		cd blazium-cpp
-		scons platform=$PLATFORM_TEMPLATES target=editor -c
-		scons platform=$PLATFORM_TEMPLATES target=template_release -c
-		git restore gdextension/gdextension_interface.h
-		git restore gdextension/extension_api.json
-		find . -type d -name "__pycache__" -exec rm -rf {} +
-		rm -f .sconsign.dblite
-		cd ..
-	fi
-
+	cd example_blazium_4.5
+	clean_blazium
 	cd ..
 
-
-
-	cd example_blazium_4.5
-	rm -f .sconsign.dblite
-	rm -f src/gdexample.os
-	rm -f src/register_types.os
-	rm -f demo/bin/*.so
-	rm -rf -f demo/export
-
-	if [ -d "blazium" ]; then
-		cd blazium
-		scons platform=$PLATFORM target=editor dev_build=no dev_mode=no $COMPILER_AND_LINKER tests=no execinfo=yes scu_build=yes -c
-		scons platform=$PLATFORM target=template_release dev_build=no dev_mode=no $COMPILER_AND_LINKER scu_build=yes -c
-		find . -name "*.gen.cpp" -delete
-		find . -type d -name "__pycache__" -exec rm -rf {} +
-		find . -type d -name "scu" -exec rm -rf {} +
-		rm -f -rf bin
-		rm -f -rf platform/linuxbsd/wayland/protocol
-		rm -f .scons_env.json
-		rm -rf .scons_node_count
-		rm -rf .sconsign5.dblite
-		rm -rf config.log
-		rm -f -rf .sconf_temp
-		rm -f build_env
-		rm -f generate_build_env.py
-		cd ..
-	fi
-
-	if [ -d "blazium-cpp" ]; then
-		cd blazium-cpp
-		scons platform=$PLATFORM_TEMPLATES target=editor -c
-		scons platform=$PLATFORM_TEMPLATES target=template_release -c
-		git restore gdextension/gdextension_interface.h
-		git restore gdextension/extension_api.json
-		find . -type d -name "__pycache__" -exec rm -rf {} +
-		rm -f .sconsign.dblite
-		cd ..
-	fi
-
+	cd example_blazium_4.5_modified
+	clean_blazium
 	cd ..
 
 	set +x
