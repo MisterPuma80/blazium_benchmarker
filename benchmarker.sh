@@ -42,7 +42,7 @@ This is a script to benchmark Blazium.
 
 COMMENT
 
-ITERATIONS=10000000
+ITERATIONS=1000000
 COMPILER="use_llvm=no"
 LINKER="linker=default"
 COMPILER_AND_LINKER="$COMPILER $LINKER"
@@ -317,6 +317,7 @@ do_benchmarks() {
 	scons platform=$PLATFORM_TEMPLATES target=template_debug dev_build=yes $COMPILER -j $BUILD_CORES iterations=$ITERATIONS
 	rm -f -rf demo/export
 	mkdir -p demo/export
+	sleep 5
 	./blazium/bin/blazium.$PLATFORM.editor.$EXT --export-release "$EXPORT_NAME" ./demo/project.godot
 	echo "!!!! Done building release blazium"
 	cd ..
@@ -327,6 +328,7 @@ do_benchmarks() {
 	scons platform=$PLATFORM_TEMPLATES target=template_debug dev_build=yes $COMPILER -j $BUILD_CORES iterations=$ITERATIONS
 	rm -f -rf demo/export
 	mkdir -p demo/export
+	sleep 5
 	./blazium/bin/blazium.$PLATFORM.editor.$EXT --export-release "$EXPORT_NAME" ./demo/project.godot
 	echo "!!!! Done building release blazium"
 	cd ..
