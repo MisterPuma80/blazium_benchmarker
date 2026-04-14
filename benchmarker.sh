@@ -148,7 +148,7 @@ _download_blazium_4_5() {
 	if [ ! -d "blazium" ]; then
 		git clone https://github.com/blazium-engine/blazium
 		cd blazium
-		git checkout blazium-4.5
+		git checkout blazium-dev
 		git submodule update --init --remote --recursive
 		cd ..
 	else
